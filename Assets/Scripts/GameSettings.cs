@@ -1,15 +1,11 @@
 using UnityEngine;
 
-/// <summary>
-/// Static class to hold game settings that persist between scenes.
-/// </summary>
+// Static class to hold game settings that persist between scenes.
 public static class GameSettings
 {
     // Default values
     public static int NumberOfPlayers { get; set; } = 2; // Default to 2 players
     public static string XAxisLabel { get; set; } = "X-Axis Feature";
     public static string YAxisLabel { get; set; } = "Y-Axis Feature";
-
-    // You could add more settings here if needed, like number of customers per round
     public static int CustomersPerRound { get; set; } = 10; // Default number of customers
 }

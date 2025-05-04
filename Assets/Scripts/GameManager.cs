@@ -1,18 +1,15 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Using the new Input System (recommended)
+using UnityEngine.InputSystem; // Using the new Input System
 using UnityEngine.SceneManagement; // For reloading scenes or going back to menu
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq; // For LINQ operations like MinBy
-using TMPro; // Added for TextMeshPro check
-using UnityEngine.UI; // Added for Image check
+using System.Linq;
+using TMPro;
+using UnityEngine.UI;
 
-/// <summary>
-/// Manages the main game loop, player turns, product placement, customer spawning, and scoring.
-/// </summary>
+// Manages the main game loop, player turns, product placement, customer spawning, and scoring.
 public class GameManager : MonoBehaviour
 {
-    // --- Game State Enum ---
     private enum GameState
     {
         Initializing,
@@ -21,17 +18,17 @@ public class GameManager : MonoBehaviour
         SpawningCustomers,
         CalculatingScores,
         RoundOver,
-        GameOver // Optional state if there's a final end condition
+        GameOver
     }
 
-    // --- Inspector Variables ---
+    // Inspector Variables
     [Header("References")]
     [Tooltip("Reference to the UIManager script")]
     [SerializeField] private UIManager uiManager;
     [Tooltip("The RectTransform of the area where products/customers can be placed (e.g., the map panel)")]
     [SerializeField] private RectTransform placementArea;
     [Tooltip("The main camera used for screen-to-world point conversion (Needed for World Space/Screen Space Camera Canvas)")]
-    [SerializeField] private Camera mainCamera; // Keep this, might be needed for non-overlay canvas
+    [SerializeField] private Camera mainCamera;
 
     [Header("Prefabs")]
     [Tooltip("Prefab for the player's product marker")]
@@ -43,11 +40,11 @@ public class GameManager : MonoBehaviour
     [Tooltip("How many customers to spawn each round")]
     [SerializeField] private int customersPerRound = 10;
     [Tooltip("Delay before starting the next round after showing scores")]
-    [SerializeField] private float endRoundDelay = 3.0f;
+    [SerializeField] private float endRoundDelay = 1.0f;
     [Tooltip("Assign unique colors for each potential player")]
     [SerializeField] private Color[] playerColors = { Color.red, Color.blue, Color.green, Color.yellow, Color.cyan, Color.magenta };
 
-    // --- Private Variables ---
+    // Private Variables
     private GameState currentState;
     private List<PlayerData> players = new List<PlayerData>();
     private List<GameObject> customerInstances = new List<GameObject>();
@@ -55,11 +52,9 @@ public class GameManager : MonoBehaviour
     private bool isInputEnabled = false; // Control when player can click to place
     private Canvas parentCanvas; // To determine render mode
 
-    // --- Unity Methods ---
-
-    void Start()
+        void Start()
     {
-        // --- Null Checks ---
+        // Null Checks
         bool error = false;
         if (uiManager == null) { Debug.LogError("UIManager reference is missing!"); error = true; }
         if (placementArea == null) { Debug.LogError("Placement Area RectTransform is missing!"); error = true; }
@@ -80,8 +75,6 @@ public class GameManager : MonoBehaviour
             this.enabled = false; // Disable script if setup is wrong
             return;
         }
-        // --- End Null Checks ---
-
 
         customersPerRound = GameSettings.CustomersPerRound; // Get from static settings
 
@@ -98,11 +91,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- Initialization ---
-
-    /// <summary>
     /// Sets up the initial game state, players, and UI.
-    /// </summary>
     private void InitializeGame()
     {
         Debug.Log("Initializing Game...");
@@ -140,9 +129,7 @@ public class GameManager : MonoBehaviour
         StartPlacementPhase();
     }
 
-    /// <summary>
-    /// Sets up listeners for the UI buttons managed by UIManager.
-    /// </summary>
+    // Sets up listeners for the UI buttons managed by UIManager.
     private void SetupButtonListeners()
     {
         if (uiManager == null) return;
@@ -161,11 +148,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    // --- Game Flow Methods ---
-
-    /// <summary>
-    /// Starts the phase where players place their products.
-    /// </summary>
+    // Starts the phase where players place their products.
     private void StartPlacementPhase()
     {
         Debug.Log("Starting Placement Phase.");
@@ -183,7 +166,7 @@ public class GameManager : MonoBehaviour
             }
             // Reset marker reference and position for the new round
             player.ProductMarkerInstance = null;
-            player.ProductPosition = Vector2.zero; // Or some invalid state like float.NaN
+            player.ProductPosition = Vector2.zero;
         }
 
 
@@ -193,34 +176,26 @@ public class GameManager : MonoBehaviour
         uiManager.UpdateScoreboard(players); // Update scoreboard (scores might be from previous round if "Play Again")
     }
 
-    /// <summary>
-    /// Updates the UI to show whose turn it is.
-    /// </summary>
+    // Updates the UI to show whose turn it is.
     private void UpdateTurnIndicator()
     {
         if (currentPlayerIndex < players.Count)
         {
             uiManager.SetTurnIndicator($"{players[currentPlayerIndex].PlayerName}'s Turn");
-            // Optional: Highlight the current player's color or marker if already placed
         }
         else
         {
-            // This case should ideally be handled by transitioning state first
             uiManager.SetTurnIndicator("All products placed!");
         }
     }
 
-    /// <summary>
-    /// Moves to the next player's turn or transitions state if all players are done.
-    /// </summary>
+    // Moves to the next player's turn or transitions state if all players are done.
     private void NextPlayerTurn()
     {
         // Ensure the current player actually placed a marker before moving on
         if (currentPlayerIndex >= players.Count || players[currentPlayerIndex].ProductMarkerInstance == null)
         {
-            Debug.LogWarning($"Attempted to advance turn, but current player ({currentPlayerIndex}) hasn't placed a marker or index is out of bounds.");
-            // Don't advance the turn if the marker isn't placed.
-            // The user needs to click again successfully.
+            Debug.LogWarning($"Attempted to advance turn, but current player ({currentPlayerIndex}) hasn't placed a marker.");
             return;
         }
 
@@ -243,9 +218,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Spawns customer markers randomly within the placement area.
-    /// </summary>
+    // Spawns customer markers randomly within the placement area.
     private void SpawnCustomers()
     {
         Debug.Log($"Spawning {customersPerRound} customers...");
@@ -263,7 +236,6 @@ public class GameManager : MonoBehaviour
         }
 
         Rect mapRect = placementArea.rect;
-        // Debug.Log($"Placement Area Rect for Spawning: {mapRect}"); // Keep this if needed
 
 
         for (int i = 0; i < customersPerRound; i++)
@@ -276,24 +248,19 @@ public class GameManager : MonoBehaviour
             // Instantiate the customer prefab as a child of the placement area
             GameObject customerGO = Instantiate(customerPrefab, placementArea.transform);
 
-            // --- Set Customer Position & Scale ---
+            // Set Customer Position
             // Set its local position using the generated coordinates
             // Add a small negative Z offset to ensure they are behind player markers if needed
-            customerGO.transform.localPosition = new Vector3(localSpawnPos.x, localSpawnPos.y, 0.1f); // Small positive Z to be behind player markers at Z=0 or negative Z
-            //customerGO.transform.localScale = Vector3.one; // Ensure scale is correct
-            // ---
+            customerGO.transform.localPosition = new Vector3(localSpawnPos.x, localSpawnPos.y, 0.1f);
 
             customerInstances.Add(customerGO);
         }
         Debug.Log($"{customerInstances.Count} customers spawned.");
 
-        // Move to score calculation
         CalculateScores();
     }
 
-    /// <summary>
-    /// Calculates scores based on proximity of products to customers.
-    /// </summary>
+    // Calculates scores based on proximity of products to customers.
     private void CalculateScores()
     {
         Debug.Log("Calculating Scores...");
@@ -318,7 +285,7 @@ public class GameManager : MonoBehaviour
 
         foreach (GameObject customerGO in customerInstances)
         {
-            if (customerGO == null) continue; // Safety check
+            if (customerGO == null) continue;
 
             float minDistanceSqr = float.MaxValue; // Use squared distance for efficiency
             PlayerData closestPlayer = null;
@@ -329,7 +296,7 @@ public class GameManager : MonoBehaviour
                 // Ensure player has actually placed a product this round
                 if (player.ProductMarkerInstance == null) continue;
 
-                // Calculate squared distance (avoids costly square root)
+                // Calculate squared distance
                 float distanceSqr = (player.ProductPosition - customerPos).sqrMagnitude;
 
                 if (distanceSqr < minDistanceSqr)
@@ -337,14 +304,11 @@ public class GameManager : MonoBehaviour
                     minDistanceSqr = distanceSqr;
                     closestPlayer = player;
                 }
-                // Tie-breaking: Current logic gives point to the first player checked who has the minimum distance.
             }
 
             if (closestPlayer != null)
             {
                 closestPlayer.Score++;
-                // Optional visual feedback (e.g., line renderer, particle effect)
-                // Debug.Log($"Customer at {customerPos} assigned to {closestPlayer.PlayerName} (Dist^2: {minDistanceSqr})");
             }
             else
             {
@@ -357,9 +321,7 @@ public class GameManager : MonoBehaviour
         EndRound(); // Move to the round over state
     }
 
-    /// <summary>
-    /// Transitions to the Round Over state, showing final scores and options.
-    /// </summary>
+    // Transitions to the Round Over state, showing final scores and options.
     private void EndRound()
     {
         Debug.Log("Round Over.");
@@ -382,12 +344,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    // --- Input Handling ---
-
-    /// <summary>
-    /// Handles mouse clicks for product placement using the new Input System.
-    /// Determines the correct camera based on Canvas Render Mode.
-    /// </summary>
+    // Input Handling
     private void HandlePlacementInput()
     {
         // Check for left mouse button click
@@ -421,28 +378,13 @@ public class GameManager : MonoBehaviour
                 eventCamera,     // The camera associated with the Canvas (null for Overlay)
                 out localPoint); // The output local position
 
-        // --- DEBUG LOGS (Keep enabled for now) ---
-        // Debug.Log($"--- Input Debug ---");
-        // Debug.Log($"Screen Position: {screenPosition}");
-        // Debug.Log($"Canvas Render Mode: {parentCanvas.renderMode}");
-        // Debug.Log($"Event Camera Used: {(eventCamera == null ? "null (Overlay)" : eventCamera.name)}");
-        // Debug.Log($"ScreenPointToLocalPointInRectangle Success: {isInside}");
-        // if(isInside) Debug.Log($"Calculated Local Point: {localPoint}");
-        // Debug.Log($"Placement Area Rect (Local): {placementArea.rect}");
-        // if(isInside) Debug.Log($"Rect Contains Local Point: {placementArea.rect.Contains(localPoint)}");
-        // Debug.Log($"-------------------");
-        // --- END DEBUG LOGS ---
-
-
-        // Check if the conversion was successful AND the point is inside the rect
+        // Check if the conversion was successful and the point is inside the rect
         if (isInside && placementArea.rect.Contains(localPoint))
         {
-            // Debug.Log($"SUCCESS: Clicked inside Placement Area at local coordinates: {localPoint}"); // Keep if needed
             PlaceProduct(localPoint);
         }
         else
         {
-            // Provide more specific feedback if possible
             if (!isInside)
             {
                 Debug.LogWarning("ScreenPointToLocalPointInRectangle failed. Check camera setup and RectTransform.");
@@ -458,10 +400,8 @@ public class GameManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// Places the current player's product marker at the specified local position.
-    /// Handles instantiation, positioning, scaling, coloring, and visibility checks.
-    /// </summary>
+    // Places the current player's product marker at the specified local position
+    // Handles instantiation, positioning, scaling, coloring, and visibility checks
     private void PlaceProduct(Vector2 localPosition)
     {
         if (currentState != GameState.WaitingForPlacement || currentPlayerIndex >= players.Count)
@@ -483,21 +423,18 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("Failed to Instantiate playerProductPrefab!");
                 return; // Critical error, cannot proceed
             }
-            currentPlayer.ProductMarkerInstance = markerInstance; // Store reference IMMEDIATELY after successful instantiation
+            currentPlayer.ProductMarkerInstance = markerInstance; // Store reference immediately after successful instantiation
         }
         else // Marker already exists, just update position
         {
             Debug.Log($"{currentPlayer.PlayerName} repositioned product to {localPosition}");
         }
 
-        // --- Set Transform Properties ---
-        // Set local position (X, Y) and ensure Z is slightly negative (in front of background at Z=0)
-        markerInstance.transform.localPosition = new Vector3(localPosition.x, localPosition.y, -0.1f); // Use negative Z
-        // Ensure scale is correct (e.g., Vector3.one) in case prefab scale is wrong
-        //markerInstance.transform.localScale = Vector3.one;
-        // ---
+        // Set local position (X, Y) and ensure Z is slightly negative
+        markerInstance.transform.localPosition = new Vector3(localPosition.x, localPosition.y, -0.1f);
 
-        // --- Customize Marker Appearance ---
+
+        // Customize Marker Appearance
         Color finalColor = currentPlayer.PlayerColor;
         finalColor.a = 1f; // Ensure alpha is fully opaque
 
@@ -507,9 +444,6 @@ public class GameManager : MonoBehaviour
         {
             sr.enabled = true; // Ensure renderer is enabled
             sr.color = finalColor;
-            // Optional: Set sorting layer/order if needed
-            // sr.sortingLayerName = "UI"; // Or your desired layer
-            // sr.sortingOrder = 10; // Ensure it's above background
         }
         else
         {
@@ -541,9 +475,7 @@ public class GameManager : MonoBehaviour
             tmpUGUI.text = (currentPlayer.PlayerId + 1).ToString();
             tmpUGUI.color = Color.white; // Or a contrasting color
         }
-        // --- End Customize Marker ---
 
-        // --- Final Visibility Check ---
         if (!markerInstance.activeInHierarchy)
         {
             Debug.LogWarning($"Marker instance '{markerInstance.name}' is not active in hierarchy after placement!");
@@ -553,12 +485,11 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogWarning($"Renderer on marker instance '{markerInstance.name}' is disabled!");
         }
-        Graphic graphic = markerInstance.GetComponentInChildren<Graphic>(); // General UI graphic check (Image, Text)
+        Graphic graphic = markerInstance.GetComponentInChildren<Graphic>(); // General UI graphic check
         if (graphic != null && !graphic.enabled)
         {
             Debug.LogWarning($"Graphic on marker instance '{markerInstance.name}' is disabled!");
         }
-        // ---
 
 
         // Store the confirmed position in player data
@@ -569,7 +500,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    // --- Button Event Handlers ---
+    // Button Event Handlers
 
     private void OnCreateCustomersClicked()
     {
@@ -593,9 +524,8 @@ public class GameManager : MonoBehaviour
     private void OnNewGameClicked()
     {
         Debug.Log("New Game Clicked - Reloading Start Menu scene.");
-        // Go back to the start menu scene. Assuming it's scene index 0.
-        // Use a specific scene name ("StartScene") if possible for robustness.
-        SceneManager.LoadScene(0); // Or SceneManager.LoadScene("StartSceneName");
+        // Go back to the start menu scene
+        SceneManager.LoadScene("StartScene");
     }
 
     private void OnExitClicked()
@@ -609,11 +539,8 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
-    // --- Utility Methods ---
 
-    /// <summary>
-    /// Destroys a list of GameObjects safely.
-    /// </summary>
+    // Destroys a list of GameObjects safely.
     private void ClearMarkers(List<GameObject> markers)
     {
         if (markers == null) return;

@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Holds data for a single player.
-/// </summary>
-[System.Serializable] // Makes it visible in the Inspector if needed (e.g., in a list)
+// Holds data for a single player.
+[System.Serializable]
 public class PlayerData
 {
     public int PlayerId { get; private set; }

@@ -1,14 +1,13 @@
 using UnityEngine;
-using UnityEngine.UI; // Required for UI elements like InputField and Button
-using UnityEngine.SceneManagement; // Required for loading scenes
-using TMPro; // Use TextMeshPro for better text rendering
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using TMPro;
 
-/// <summary>
-/// Manages the UI interactions and logic for the Start Scene.
-/// </summary>
+
+// Manages the UI interactions and logic for the Start Scene.
 public class StartMenuManager : MonoBehaviour
 {
-    // --- Inspector Variables ---
+    // Inspector Variables
     [Header("UI Elements")]
     [Tooltip("Input field for the number of players")]
     [SerializeField] private TMP_InputField playerCountInput;
@@ -24,9 +23,8 @@ public class StartMenuManager : MonoBehaviour
 
     [Header("Scene Management")]
     [Tooltip("Name of the main game scene to load")]
-    [SerializeField] private string gameSceneName = "GameScene"; // Make sure this matches your scene name
+    [SerializeField] private string gameSceneName = "GameScene";
 
-    // --- Unity Methods ---
 
     void Start()
     {
@@ -54,7 +52,6 @@ public class StartMenuManager : MonoBehaviour
             Debug.LogError("Play Button is not assigned in the Inspector!");
         }
 
-        // Optional: Add validation listeners to input fields
         if (playerCountInput != null)
         {
             playerCountInput.onValueChanged.AddListener(ValidatePlayerCount);
@@ -74,15 +71,12 @@ public class StartMenuManager : MonoBehaviour
         }
     }
 
-    // --- Public Methods ---
 
-    /// <summary>
-    /// Called when the Play button is clicked.
-    /// Stores settings and loads the game scene.
-    /// </summary>
+    // Called when the Play button is clicked
+    // Stores settings and loads the game scene
     public void StartGame()
     {
-        // --- Store Settings ---
+        // Store Settings
         // Player Count
         if (int.TryParse(playerCountInput.text, out int playerCount) && playerCount > 0)
         {
@@ -91,15 +85,14 @@ public class StartMenuManager : MonoBehaviour
         else
         {
             Debug.LogWarning("Invalid player count input. Using default: " + GameSettings.NumberOfPlayers);
-            // Optionally show a message to the user
             playerCountInput.text = GameSettings.NumberOfPlayers.ToString(); // Reset input field
         }
 
-        // Axis Labels (allow empty strings if desired)
+        // Axis Labels
         GameSettings.XAxisLabel = xAxisInput.text;
         GameSettings.YAxisLabel = yAxisInput.text;
 
-        // --- Load Game Scene ---
+        // Load Game Scene
         if (!string.IsNullOrEmpty(gameSceneName))
         {
             Debug.Log($"Starting game with {GameSettings.NumberOfPlayers} players. X: '{GameSettings.XAxisLabel}', Y: '{GameSettings.YAxisLabel}'. Loading scene: {gameSceneName}");
@@ -111,38 +104,32 @@ public class StartMenuManager : MonoBehaviour
         }
     }
 
-    // --- Private Helper Methods ---
 
-    /// <summary>
-    /// Validates the player count input in real-time (optional).
-    /// </summary>
+    // Validates the player count input
     private void ValidatePlayerCount(string input)
     {
         if (int.TryParse(input, out int count))
         {
             if (count <= 0)
             {
-                // Maybe show a warning color or message
                 Debug.LogWarning("Player count must be greater than 0.");
-                // Optionally disable the play button if invalid
-                // playButton.interactable = false;
+                // disable the play button if invalid
+                playButton.interactable = false;
             }
             else
             {
                 // Input is valid
-                // playButton.interactable = true;
+                playButton.interactable = true;
             }
         }
         else if (!string.IsNullOrEmpty(input)) // If input is not empty and not a number
         {
-            // Maybe show a warning color or message
             Debug.LogWarning("Player count must be a number.");
-            // playButton.interactable = false;
+            playButton.interactable = false;
         }
         else // If input is empty
         {
-             // Allow empty input temporarily or handle as needed
-             // playButton.interactable = false;
+             playButton.interactable = false;
         }
     }
 }
