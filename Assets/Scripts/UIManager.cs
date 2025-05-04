@@ -138,7 +138,7 @@ public class UIManager : MonoBehaviour
         //SetButtonVisibility(exitButton, showRoundEndOptions); // Show exit with other round end options
     }
 
-    // Shows a simple message box with the given text.
+    // Simple message box with the given text
     public void ShowMessageBox(string message)
     {
         if (messageBoxPanel != null && messageBoxText != null)
